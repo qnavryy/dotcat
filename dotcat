@@ -1,0 +1,107 @@
+#!/bin/bash
+
+dotfile_dir=$(realpath "$(dirname "$(realpath "$0")")/../dotfiles")
+
+error() {
+	printf 'Error: %s\n' "$1" >&2
+	exit 1
+}
+
+status() {
+	printf '%s\n' "$1"
+}
+
+usage() {
+	printf '%s\n' "Usage:
+    dotcat add <file> <category>                 Add <file> to <category>
+    dotcat link [category0 category1 ...]        Symlink all files in [categories]"
+	exit 1
+}
+
+add_file() {
+	file=$1
+	file_abs=$(realpath -s "$file")
+	category="$2"
+
+	mkdir -p "$dotfile_dir/$category/"
+	cp -Pf "$file_abs" "$dotfile_dir/$category/"
+
+	status "  Added $file to $category."
+}
+
+link_file() {
+	category=$2
+	src_abs=$1
+	dst_abs=$HOME/$(realpath -s --relative-to="$dotfile_dir/$category" "$src_abs")
+
+	mkdir -p "$(dirname "$dst_abs")"
+	ln -sf "$src_abs" "$dst_abs"
+
+	status "  Linked $src_abs to $dst_abs."
+}
+
+link_category() {
+	category_abs=$1
+	category=$(realpath --relative-to="$dotfile_dir" "$category_abs")
+
+	while IFS= read -r -d '' file_abs; do
+		link_file "$file_abs" "$category"
+	done < <(find "$category_abs" -mindepth 1 -type f -print0 && find "$category_abs" -mindepth 1 -type l -print0)
+
+	status "$category linked."
+}
+
+add() {
+	file=$1
+	category=$2
+
+	if [ -f "$file" ]; then
+		add_file "$file" "$category"
+		link_file "$dotfile_dir/$category/$(realpath -s --relative-to="$HOME" "$file")" "$category"
+	elif [ -d "$file" ]; then
+		error "$file is a directory."
+	else
+		error "$file does not exist."
+	fi
+}
+
+link() {
+	if [ -z "$1" ]; then
+		while IFS= read -r -d '' category_abs; do
+			category="$(basename "$category_abs")"
+			read -r -p "Link $category? [Y/n]" choice </dev/tty
+
+			if [ "$choice" == "Y" ] || [ "$choice" == "y" ]; then
+				link_category "$category_abs"
+			else
+				status "Skipped $category."
+			fi
+		done < <(find "$dotfile_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+	elif [ -d "$dotfile_dir/$1" ]; then
+		link_category "$dotfile_dir/$1"
+	else
+		error "Category $1 does not exist."
+	fi
+}
+
+case "$1" in
+add)
+	if [ $# -eq 3 ]; then
+		add "$2" "$3"
+	else
+		usage
+	fi
+	;;
+link)
+	if [ $# -eq 1 ]; then
+		link
+	else
+		for category in "${@:2}"; do
+			link "$category"
+		done
+	fi
+	;;
+*)
+	usage
+	;;
+esac
