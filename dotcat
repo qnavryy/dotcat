@@ -43,6 +43,11 @@ link_file() {
 link_category() {
 	category_abs=$1
 	category=$(realpath --relative-to="$dotfile_dir" "$category_abs")
+	rc_file_abs="$(dirname "$category_abs")/$category.rc"
+
+	if [ -f "$rc_file_abs" ]; then
+		. "$rc_file_abs"
+	fi
 
 	while IFS= read -r -d '' file_abs; do
 		link_file "$file_abs" "$category"
