@@ -13,6 +13,8 @@ dotfiles
   ∟ .somedotfile
 ∟ category1
 ∟ etc.
+∟ category0.rc
+∟ etc.
 ```
 
 ## Usage
@@ -24,8 +26,8 @@ dotcat link [category0 category1 ...]     # Symlink all files in [categories], i
                                             prompt the user for every category
 ```
 
-## Linking Behavior
-All files (including symlinks) in a category are symlinked to `$HOME`, non existent directories are created. Conflicting files are overwritten.
+## Behavior
+If it exists `<category>.rc` is sourced. All files (including symlinks) in the category are symlinked to `$HOME`, non existent directories are created. Conflicting files are overwritten.
 
 ## Contributing
 Bug reports and pull requests are always welcome.
