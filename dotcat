@@ -62,7 +62,6 @@ add() {
 
 	if [ -f "$file" ]; then
 		add_file "$file" "$category"
-		link_file "$dotfile_dir/$category/$(realpath -s --relative-to="$HOME" "$file")" "$category"
 	elif [ -d "$file" ]; then
 		error "$file is a directory."
 	else
