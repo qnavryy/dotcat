@@ -27,7 +27,7 @@ dotcat link [category0 category1 ...]     # Symlink all files in [categories], i
 ```
 
 ## Behavior
-If it exists `<category>.sh` is sourced. All files (including symlinks) in the category are symlinked to `$HOME`, non existent directories are created. Conflicting files are overwritten.
+If it exists `<category>.sh` is sourced. All files not starting with `_` (including symlinks) in the category are symlinked to `$HOME`, non existent directories are created. Conflicting files are overwritten.
 
 ## Contributing
 Bug reports and pull requests are always welcome.
