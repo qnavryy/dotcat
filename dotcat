@@ -51,7 +51,7 @@ link_category() {
 
 	while IFS= read -r -d '' file_abs; do
 		link_file "$file_abs" "$category"
-	done < <(find "$category_abs" -mindepth 1 -type f -print0 && find "$category_abs" -mindepth 1 -type l -print0)
+	done < <(find "$category_abs" -mindepth 1 -not -name "_*" -type f -print0 && find "$category_abs" -mindepth 1 -not -name "_*" -type l -print0)
 
 	status "$category linked."
 }
